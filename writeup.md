@@ -42,7 +42,6 @@ The following parameters were calculated:
 * The shape of a traffic sign image = (32, 32, 3)
 * The number of unique classes/labels in the data set = 43
 
-
 ####2. Include an exploratory visualization of the dataset.
 
 Here is an exploratory visualization of the data set. It is a bar chart showing how the data is split between training, test, and validation sets.
@@ -59,7 +58,13 @@ Here is an example of a traffic sign image.
 
 ![alt text][image2]
 
-The amount of data present in the data sets was sufficient So, I decided to use the split of the data as mentioned above for training the Neural Net:
+Every input was normalized for training and validation as follows:
+
+      np.array(batch_x / 255.0 - 0.5 )
+
+This way the input data has mean as zero and equal variance. When the data is normalized it is help to avoid network weight explosion.
+
+The amount of data present in the data sets was sufficient So, I decided to use the split of the data as mentioned above for training the Neural Net. When I was selecting parameters such as batch size and learning rate, I evaluated the efficiency of the network using only validation subset. Once I selected the parameters, I run the network on the test subset. Also, the EPOCH count is limited by the 50. If the accuracy of the net is not improving after 3 consecutive batches, the training stops.
 
 
 
@@ -104,28 +109,38 @@ My final model consisted of the following layers:
 
 
 ####3. Model Training. 
-To train the model, I used an Adam optimizer for cross entropy between the answer set and the produced results. The answer set was presented as one_hot vector. The learning rate is 0.01. There were 10 epochs. During each epoch a batch size was set to 128. 
+To train the model, I used an Adam optimizer for cross entropy between the answer set and the produced results. The answer set was presented as one_hot vector. The initial learning rate is 0.001. There were 50 epochs max. During each epoch a batch size was set to 1024. The learning was selected based on several initial experiments. Having at first try the learning rate as 0.1 was too high the network would not get any descent accuracy. Having 0.0001 was too small. I settled for the 0.001 as initial learning rate. After the epoch 10 and 20 I stared reducing the learn_rate as follows:
+
+        if (epoch_count > 10):
+            rate = rate *.5
+        if (epoch_count>20):
+            rate = rate *.3
 
 ####4. Approach taken for finding a solution
- and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
+ 
 
 My final model results were:
 
-* training set accuracy of 85%
-* validation set accuracy of 96% 
-* test set accuracy of 86%
+* training set accuracy of   98%
+* validation set accuracy of 98% 
+* test set accuracy of       87%
 
-If an iterative approach was chosen:
-* What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
-* How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
+		with tf.Session() as sess:
+    	  saver.restore(sess, tf.train.latest_checkpoint('.'))
+    	  validation_accuracy = evaluate(X_validation, y_validation)
+    	  print("Validation Accuracy = {:.3f}".format(validation_accuracy))
 
-If a well known architecture was chosen:
-* What architecture was chosen?
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
+	Validation Accuracy = 0.979
+
+		with tf.Session() as sess:
+	       saver.restore(sess, tf.train.latest_checkpoint('.'))	
+	       test_accuracy = evaluate(X_test, y_test)
+	       print("Test Accuracy = {:.3f}".format(test_accuracy))
+
+	Test Accuracy = 0.866
+
+The architecture was built based on the LeNet DNN. I thought since the LeNet can distinguish the the hand written image, it should be a good starting point for to classifying traffic signs. I made some changes to the architecture by adding two additional convolutional layers and two additional fully connected layers. Unlike the LeNet network, my first two conv filters were 3x3 and more depth; I preserved the image size for the fist two layers. When I compared the activations on the first layers, I noticed the activations  in FeatureMap2 highlighted the numbers of the sign. A deeper network produced better results.  
+
  
 
 ###Testing the Model on New Images
