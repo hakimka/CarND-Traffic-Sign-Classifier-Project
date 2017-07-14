@@ -59,7 +59,7 @@ Here is an exploratory visualization of the data set. It is a bar chart showing 
 
 ###Design and Test a Model Architecture
 
-####1. Describe how you preprocessed the image data. What techniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, and provide example images of the additional data. Then describe the characteristics of the augmented training set like number of images in the set, number of images for each class, etc.)
+####1. Preprocessed the image data
 
 As a first step, I decided to keep the images in RGB schema.
 
@@ -67,9 +67,15 @@ Here is an example of a traffic sign image.
 
 ![alt text][image2]
 
-The amount of data present in the data sets was sufficient So, I decided to use the split of the data as mentioned above for training the Neural Net:
+The amount of data present in the data sets was sufficient So, I decided to use the split of the data as mentioned above for training the Neural Net. 
 
+I choose to normalize the input data using the following formula
 
+	# Normalized Data
+	X_trainNorm = np.array(X_train / 255.0 - 0.5 )
+	X_testNorm = np.array(X_test / 255.0 - 0.5 )
+
+The reason for this formula is the following. Each channel has pixels with values ranging form 0 to 255. By scaling down values (division 255) and subtracting 0.5, I shift the range of values for all three channels from [-0.5, 0.5]. This way the data has mean value of 0 and variance 0.5. This setup helps the training process "to improve by numerical conditions." (http://www.faqs.org/faqs/ai-faq/neural-nets/part2/)
 
 ####2. Model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
 
@@ -131,7 +137,7 @@ My final model consisted of the following layers:
 To train the model, I used an Adam optimizer for cross entropy between the answer set and the produced results. The answer set was presented as one_hot vector. The learning rate is 0.001. There were 50 epochs. During each epoch a batch size was set to 1024. 
 
 ####4. Approach taken for finding a solution
- and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
+
 
 My final model results were:
 
@@ -139,18 +145,7 @@ My final model results were:
 * validation set accuracy of 96% 
 * test set accuracy of 86%
 
-If an iterative approach was chosen:
-* What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
-* How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
-
-If a well known architecture was chosen:
-* What architecture was chosen?
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
- 
+Initially I choose an architecture from LeNet. I thought, since LeNet can classify images of handwritten numeric images, it should be a good starting point for classifying traffic images. After training on LeNet architecture with a minor twist of supplying 32x32x3 input, I discovered that the test accuracy was not getting higher than 82%. I decided to make the architecture deeper by adding two additional convolutinal layers and adding two more fully  connected layers. The accuracy number on the new architecture got better- 86% on testiing and I was getting 97%+ on training. Having deeper architecture with smaller kernels made sense because the traffic signs contain more "complex" relationships than black and white images of the numbers. I'd would have gone with a deeper architecture under the hypothesis that deeper the net the more complex image relationships it can discover. What stopped me experimenting further is the training  time increased from several seconds to a couple of minutes. I was not sure how my adding 3-10 more layers would affect the time required to train.  
 
 ###Testing the Model on New Images
 
@@ -175,7 +170,7 @@ Here are the results of the prediction:
  * Stop Sign            - Stop Sign
  * 30 km/h              - 30 km/h
  * 50 km/h              - 50 km/h
- * Bumpy Road           - 30 km/h
+ * Bumpy Road           - Bumpy Road
 
 The model was able to correctly guess 5 of the 5 known traffic signs, which gives an accuracy of 100%. 
 
